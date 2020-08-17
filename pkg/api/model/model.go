@@ -24,12 +24,8 @@ func (m *Model) FormatAndValidate() error {
 }
 
 // Create creates the current instance in DB
-func (m *Model) Create(db *gorm.DB) (*Model, error) {
-	err := db.Create(&m).Error
-	if err != nil {
-		return &Model{}, err
-	}
-	return m, err
+func (m *Model) Create(db *gorm.DB) error {
+	return db.Create(&m).Error
 }
 
 // GetAll gets all instances from DB
