@@ -41,7 +41,11 @@ func (s *Server) SetRoutes() {
 	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello Mltrack\n")
 	})
+	// model endpoints
 	s.router.HandleFunc("/models", middleware.SetJSONHeader(s.CreateModel)).Methods("POST")
+	s.router.HandleFunc("/models", middleware.SetJSONHeader(s.GetAllModels)).Methods("GET")
+	s.router.HandleFunc("/models/{id}", middleware.SetJSONHeader(s.GetModelByID)).Methods("GET")
+	s.router.HandleFunc("/models/{id}", middleware.SetJSONHeader(s.DeleteModelByID)).Methods("DELETE")
 }
 
 // Run runs the server

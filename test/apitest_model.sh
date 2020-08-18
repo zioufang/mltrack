@@ -3,16 +3,15 @@
 URL="http://localhost:8000"
 
 createModel() {
-    name=$1
     echo "testing POST on /models with ( $1 )"
     curl -X POST \
         "$URL/models" \
         --header 'Content-Type: application/json' \
         --header 'Accept: application/json' \
-        -d '
-        {
-          "name": "'"$name"'"
-        }'
+        -d $1
 }
 
-createModel 'testmodel'
+createModel '{"name":"testmodel"}'
+createModel '{"name":"testmodel","somthing":"somevalue"}'
+createModel '{"somthing":"somevalue"}'
+

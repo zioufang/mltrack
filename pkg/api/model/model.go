@@ -23,15 +23,15 @@ func (m *Model) FormatAndValidate() error {
 	return nil
 }
 
-// Create creates the current instance in DB
-func (m *Model) Create(db *gorm.DB) error {
+// CreateModel creates the current instance in DB
+func (m *Model) CreateModel(db *gorm.DB) error {
 	return db.Create(&m).Error
 }
 
-// GetAll gets all instances from DB
-func (m *Model) GetAll(db *gorm.DB) (*[]Model, error) {
+// GetAllModels gets all instances from DB
+func (m *Model) GetAllModels(db *gorm.DB) (*[]Model, error) {
 	models := []Model{}
-	err := db.Find([]Model{}).Error
+	err := db.Find(&models).Error
 	if err != nil {
 		return &[]Model{}, err
 	}
@@ -39,8 +39,8 @@ func (m *Model) GetAll(db *gorm.DB) (*[]Model, error) {
 
 }
 
-// GetByID gets one instance by ID from DB
-func (m *Model) GetByID(db *gorm.DB, uid uint) (*Model, error) {
+// GetModelByID gets one instance by ID from DB
+func (m *Model) GetModelByID(db *gorm.DB, uid uint64) (*Model, error) {
 	err := db.Where("id = ?", uid).Take(&m).Error
 	if err != nil {
 		return &Model{}, err
@@ -48,7 +48,7 @@ func (m *Model) GetByID(db *gorm.DB, uid uint) (*Model, error) {
 	return m, err
 }
 
-// Delete deletes the current instance from DB
-func (m *Model) Delete(db *gorm.DB) error {
-	return db.Delete(&m).Error
+// DeleteModelByID deletes the current instance from DB
+func (m *Model) DeleteModelByID(db *gorm.DB, uid uint64) error {
+	return db.Model(&m).Where("id = ?", uid).Take(&m).Delete(&m).Error
 }
