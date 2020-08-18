@@ -3,9 +3,12 @@ package controller
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/zioufang/mltrackapi/pkg/api/middleware"
 	"github.com/zioufang/mltrackapi/pkg/api/model"
 )
 
@@ -35,5 +38,15 @@ func (s *Server) Init(DbDriver, DbName string) {
 
 // SetRoutes sets the routs for the server
 func (s *Server) SetRoutes() {
-	s.router.HandleFunc("/models", s.CreateModel).Methods("POST")
+	s.router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello Mltrack\n")
+	})
+	s.router.HandleFunc("/models", middleware.SetJSONHeader(s.CreateModel)).Methods("POST")
+}
+
+// Run runs the server
+func (s *Server) Run(port uint) {
+	fmt.Printf("Listening to port %d\n", port)
+	addr := ":" + fmt.Sprint(port)
+	log.Fatal(http.ListenAndServe(addr, s.router))
 }
