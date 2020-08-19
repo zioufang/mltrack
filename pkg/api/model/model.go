@@ -10,8 +10,8 @@ import (
 
 // Model is the struct to hold machine learning model
 type Model struct {
-	gorm.Model
-	Name string
+	CommonFields
+	Name string `json:"name"`
 }
 
 // FormatAndValidate formats the input then validates it
@@ -40,8 +40,8 @@ func (m *Model) GetAllModels(db *gorm.DB) (*[]Model, error) {
 }
 
 // GetModelByID gets one instance by ID from DB
-func (m *Model) GetModelByID(db *gorm.DB, uid uint64) (*Model, error) {
-	err := db.Where("id = ?", uid).Take(&m).Error
+func (m *Model) GetModelByID(db *gorm.DB, id uint64) (*Model, error) {
+	err := db.Where("id = ?", id).Take(&m).Error
 	if err != nil {
 		return &Model{}, err
 	}
@@ -49,6 +49,6 @@ func (m *Model) GetModelByID(db *gorm.DB, uid uint64) (*Model, error) {
 }
 
 // DeleteModelByID deletes the current instance from DB
-func (m *Model) DeleteModelByID(db *gorm.DB, uid uint64) error {
-	return db.Model(&m).Where("id = ?", uid).Take(&m).Delete(&m).Error
+func (m *Model) DeleteModelByID(db *gorm.DB, id uint64) error {
+	return db.Model(&m).Where("id = ?", id).Take(&m).Delete(&m).Error
 }

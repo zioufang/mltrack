@@ -12,18 +12,41 @@ type Entity interface {
 	FormatAndValidate() error
 }
 
-// ResponseJSON wraps the payload data in JSON format
-func ResponseJSON(w http.ResponseWriter, data interface{}) {
-	err := json.NewEncoder(w).Encode(data)
+type respBody struct {
+	Success bool        `json:"success"`
+	Data    interface{} `json:"data"`
+}
+
+func (rb *respBody) parseResp(success bool, data interface{}) {
+	rb.Success = success
+	rb.Data = data
+}
+
+type errorMsg struct {
+	Message string `json:"message"`
+}
+
+// responseJSON wraps the response in {success: "", data: {}} format
+func respJSON(w http.ResponseWriter, success bool, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	resp := &respBody{}
+	resp.parseResp(success, data)
+	err := json.NewEncoder(w).Encode(resp)
 	if err != nil {
 		fmt.Fprintf(w, "%s", err.Error())
 	}
 }
 
-// ResponseError sets status code and error message to the ResponseWriter
-func ResponseError(w http.ResponseWriter, statusCode int, err error) {
+// RespSuccess sets the success to true and add the data payload in response
+func RespSuccess(w http.ResponseWriter, data interface{}) {
+	respJSON(w, true, data)
+}
+
+// RespError sets status code, sets the success to false and add an error message to data paylaod in response
+func RespError(w http.ResponseWriter, statusCode int, err error) {
 	w.WriteHeader(statusCode)
-	w.Write([]byte(err.Error()))
+	errMsg := errorMsg{Message: err.Error()}
+	respJSON(w, false, errMsg)
 }
 
 // ReadReqBody reads the request body into a specified Struct and validate it
