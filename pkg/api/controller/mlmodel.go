@@ -14,12 +14,12 @@ import (
 // CreateModel creates the entity in the database
 func (s *Server) CreateModel(w http.ResponseWriter, r *http.Request) {
 	m := model.Model{}
-	err := apiutil.ReadReqBody(w, r, &m)
+	err := apiutil.ReadReqBody(w, r, s.db, &m)
 	if err != nil {
 		apiutil.RespError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = m.CreateModel(s.db)
+	err = m.Create(s.db)
 	if err != nil {
 		apiutil.RespError(w, http.StatusInternalServerError, err)
 		return
@@ -30,7 +30,7 @@ func (s *Server) CreateModel(w http.ResponseWriter, r *http.Request) {
 // GetAllModels gets all the models from the database
 func (s *Server) GetAllModels(w http.ResponseWriter, r *http.Request) {
 	m := model.Model{}
-	models, err := m.GetAllModels(s.db)
+	models, err := m.GetAll(s.db)
 	if err != nil {
 		apiutil.RespError(w, http.StatusInternalServerError, err)
 		return
@@ -47,7 +47,7 @@ func (s *Server) GetModelByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m := model.Model{}
-	modelGet, err := m.GetModelByID(s.db, id)
+	modelGet, err := m.GetByID(s.db, id)
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
@@ -63,7 +63,7 @@ func (s *Server) DeleteModelByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m := model.Model{}
-	err = m.DeleteModelByID(s.db, id)
+	err = m.DeleteByID(s.db, id)
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return

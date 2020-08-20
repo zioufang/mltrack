@@ -31,7 +31,8 @@ func (s *Server) Init(DbDriver, DbName string) {
 	default:
 		log.Fatal(fmt.Errorf("%s is not a supported database", DbDriver))
 	}
-	s.db.AutoMigrate(&model.Model{})
+	// TODO add foreign key creation when necessary
+	s.db.AutoMigrate(&model.Model{}, &model.ModelRun{})
 	s.router = chi.NewRouter()
 	// A good base middleware stack
 	s.router.Use(middleware.RequestID)
@@ -58,6 +59,17 @@ func (s *Server) SetRoutes() {
 			r.Delete("/", s.DeleteModelByID)
 		})
 	})
+
+	// model run endpoints
+	r.Route("/runs", func(r chi.Router) {
+		r.Post("/", s.CreateModelRun)
+		r.Get("/", s.GetAllModelRuns)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", s.GetModelRunByID)
+			r.Delete("/", s.DeleteModelRunByID)
+		})
+	})
+
 }
 
 // Run runs the server

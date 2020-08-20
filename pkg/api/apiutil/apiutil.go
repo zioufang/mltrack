@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Entity is an abstract interface for a DB model used in API
 type Entity interface {
-	FormatAndValidate() error
+	FormatAndValidate(*gorm.DB) error
 }
 
 type respBody struct {
@@ -50,7 +52,7 @@ func RespError(w http.ResponseWriter, statusCode int, err error) {
 }
 
 // ReadReqBody reads the request body into a specified Struct and validate it
-func ReadReqBody(w http.ResponseWriter, r *http.Request, e Entity) error {
+func ReadReqBody(w http.ResponseWriter, r *http.Request, db *gorm.DB, e Entity) error {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return err
@@ -59,7 +61,7 @@ func ReadReqBody(w http.ResponseWriter, r *http.Request, e Entity) error {
 	if err != nil {
 		return err
 	}
-	err = e.FormatAndValidate()
+	err = e.FormatAndValidate(db)
 	if err != nil {
 		return err
 	}
