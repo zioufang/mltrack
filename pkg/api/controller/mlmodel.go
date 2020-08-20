@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -39,20 +40,37 @@ func (s *Server) GetAllModels(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccess(w, models)
 }
 
-// GetModelByID gets one model given an ID from the database
-func (s *Server) GetModelByID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		apiutil.RespError(w, http.StatusBadRequest, err)
-		return
-	}
+// GetModel gets one model from the database
+func (s *Server) GetModel(w http.ResponseWriter, r *http.Request) {
 	m := model.Model{}
-	modelGet, err := m.GetByID(s.db, id)
-	if err != nil {
-		apiutil.RespError(w, http.StatusBadRequest, err)
+
+	// ?id= prioritized over ?name= if both are provided, else raise error
+	if idStr := r.URL.Query().Get("id"); idStr != "" {
+		id, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			apiutil.RespError(w, http.StatusBadRequest, err)
+			return
+		}
+		modelGet, err := m.GetByID(s.db, id)
+		if err != nil {
+			apiutil.RespError(w, http.StatusBadRequest, err)
+			return
+		}
+		apiutil.RespSuccess(w, modelGet)
+		return
+	} else if name := r.URL.Query().Get("name"); name != "" {
+		modelGet, err := m.GetByName(s.db, name)
+		if err != nil {
+			apiutil.RespError(w, http.StatusBadRequest, err)
+			return
+		}
+		apiutil.RespSuccess(w, modelGet)
+		return
+	} else {
+		apiutil.RespError(w, http.StatusUnprocessableEntity, errors.New("Need to provide the parameter 'id' or 'name'"))
 		return
 	}
-	apiutil.RespSuccess(w, modelGet)
+
 }
 
 // DeleteModelByID deletes one model given an ID from the database

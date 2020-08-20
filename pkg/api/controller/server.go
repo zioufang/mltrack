@@ -31,7 +31,7 @@ func (s *Server) Init(DbDriver, DbName string) {
 	default:
 		log.Fatal(fmt.Errorf("%s is not a supported database", DbDriver))
 	}
-	// TODO add foreign key creation when necessary
+	// TODO add foreign key & index when necessary
 	s.db.AutoMigrate(&model.Model{}, &model.ModelRun{})
 	s.router = chi.NewRouter()
 	// A good base middleware stack
