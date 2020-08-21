@@ -8,11 +8,13 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Model is the struct to hold machine learning model
+// Model is the struct to hold a machine learning model
 type Model struct {
 	CommonFields
 	// TODO create index in migration
-	Name string `gorm:"unique;not null;index:model_name" json:"name"`
+	Name        string `gorm:"unique;not null;index:model_name" json:"name"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 // FormatAndValidate formats the input then validates it
@@ -67,4 +69,9 @@ func (m *Model) GetByName(db *gorm.DB, name string) (*Model, error) {
 // DeleteByID deletes the current instance from DB
 func (m *Model) DeleteByID(db *gorm.DB, id uint64) error {
 	return db.Model(&m).Where("id = ?", id).Take(&m).Delete(&m).Error
+}
+
+// DeleteByName deletes the current instance from DB
+func (m *Model) DeleteByName(db *gorm.DB, name string) error {
+	return db.Model(&m).Where("name = ?", name).Take(&m).Delete(&m).Error
 }

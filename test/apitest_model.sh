@@ -13,12 +13,12 @@ createModel() {
 
 getModelByName() {
     echo "testing GET /models with model name"
-    curl -X "$URL/models/$1" \
+    curl -X "$URL/models/$1"
 }
 
 deleteModel() {
     echo "testing DELETE /models"
-    curl -X DELETE "$URL/models/$1" \
+    curl -X DELETE "$URL/models/$1"
 }
 
 createModel '{"name":"testmodel"}'

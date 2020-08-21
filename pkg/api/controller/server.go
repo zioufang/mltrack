@@ -53,11 +53,9 @@ func (s *Server) SetRoutes() {
 	// model endpoints
 	r.Route("/models", func(r chi.Router) {
 		r.Post("/", s.CreateModel)
-		r.Get("/", s.GetAllModels)
-		r.Route("/{id}", func(r chi.Router) {
-			r.Get("/", s.GetModelByID)
-			r.Delete("/", s.DeleteModelByID)
-		})
+		r.Get("/", s.GetModel)
+		r.Delete("/", s.DeleteModel)
+		r.Get("/all", s.GetAllModels)
 	})
 
 	// model run endpoints

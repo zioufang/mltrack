@@ -2,12 +2,10 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi"
 	"github.com/zioufang/mltrackapi/pkg/api/apiutil"
 	"github.com/zioufang/mltrackapi/pkg/api/model"
 )
@@ -40,53 +38,62 @@ func (s *Server) GetAllModels(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccess(w, models)
 }
 
-// GetModel gets one model from the database
+// GetModel gets one model from the database, expects 'id' or 'name' form url param
 func (s *Server) GetModel(w http.ResponseWriter, r *http.Request) {
 	m := model.Model{}
+	var modelGet *model.Model
+	var err error
 
-	// ?id= prioritized over ?name= if both are provided, else raise error
-	if idStr := r.URL.Query().Get("id"); idStr != "" {
-		id, err := strconv.ParseUint(idStr, 10, 64)
+	// ?id= prioritized over ?name= if both are provided in the url parameter
+	if idParam := r.URL.Query().Get("id"); idParam != "" {
+		var id uint64
+		id, err = strconv.ParseUint(idParam, 10, 64)
 		if err != nil {
 			apiutil.RespError(w, http.StatusBadRequest, err)
 			return
 		}
-		modelGet, err := m.GetByID(s.db, id)
-		if err != nil {
-			apiutil.RespError(w, http.StatusBadRequest, err)
-			return
-		}
-		apiutil.RespSuccess(w, modelGet)
-		return
+		modelGet, err = m.GetByID(s.db, id)
 	} else if name := r.URL.Query().Get("name"); name != "" {
-		modelGet, err := m.GetByName(s.db, name)
-		if err != nil {
-			apiutil.RespError(w, http.StatusBadRequest, err)
-			return
-		}
-		apiutil.RespSuccess(w, modelGet)
-		return
+		modelGet, err = m.GetByName(s.db, name)
 	} else {
 		apiutil.RespError(w, http.StatusUnprocessableEntity, errors.New("Need to provide the parameter 'id' or 'name'"))
 		return
 	}
 
+	// if no error from retrieving modelGet
+	if err != nil {
+		apiutil.RespError(w, http.StatusBadRequest, err)
+		return
+	}
+	apiutil.RespSuccess(w, modelGet)
+
 }
 
-// DeleteModelByID deletes one model given an ID from the database
-func (s *Server) DeleteModelByID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		apiutil.RespError(w, http.StatusBadRequest, err)
-		return
-	}
+// DeleteModel deletes a model from the database
+func (s *Server) DeleteModel(w http.ResponseWriter, r *http.Request) {
 	m := model.Model{}
-	err = m.DeleteByID(s.db, id)
+	var err error
+
+	// ?id= prioritized over ?name= if both are provided in the url parameter
+	if idParam := r.URL.Query().Get("id"); idParam != "" {
+		var id uint64
+		id, err = strconv.ParseUint(idParam, 10, 64)
+		if err != nil {
+			apiutil.RespError(w, http.StatusBadRequest, err)
+			return
+		}
+		err = m.DeleteByID(s.db, id)
+	} else if name := r.URL.Query().Get("name"); name != "" {
+		err = m.DeleteByName(s.db, name)
+	} else {
+		apiutil.RespError(w, http.StatusUnprocessableEntity, errors.New("Need to provide the parameter 'id' or 'name'"))
+		return
+	}
+
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
 	}
-	w.Header().Set("Entity", fmt.Sprintf("%d", id))
 	w.WriteHeader(http.StatusNoContent)
 	apiutil.RespSuccess(w, "")
 }
