@@ -7,7 +7,7 @@ import (
 // Run runs the server
 func Run() {
 	var server = controller.Server{}
-	server.Init("sqlite3", "test.db")
+	server.Init("sqlite3", "mltrack.db")
 
 	var port uint = 8000
 	server.Run(port)

@@ -94,6 +94,5 @@ func (s *Server) DeleteModel(w http.ResponseWriter, r *http.Request) {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
 	}
-	w.WriteHeader(http.StatusNoContent)
-	apiutil.RespSuccess(w, "")
+	apiutil.RespSuccess(w, "record deleted")
 }

@@ -25,7 +25,7 @@ func (rb *respBody) parseResp(success bool, data interface{}) {
 }
 
 type errorMsg struct {
-	Message string `json:"message"`
+	ErrorMessage string `json:"error_message"`
 }
 
 // responseJSON wraps the response in {success: "", data: {}} format
@@ -47,7 +47,7 @@ func RespSuccess(w http.ResponseWriter, data interface{}) {
 // RespError sets status code, sets the success to false and add an error message to data paylaod in response
 func RespError(w http.ResponseWriter, statusCode int, err error) {
 	w.WriteHeader(statusCode)
-	errMsg := errorMsg{Message: err.Error()}
+	errMsg := errorMsg{ErrorMessage: err.Error()}
 	respJSON(w, false, errMsg)
 }
 

@@ -22,13 +22,14 @@ func (r *ModelRun) FormatAndValidate(db *gorm.DB) error {
 	return nil
 }
 
-// Create creates the current instance in DB
-func (r *ModelRun) Create(db *gorm.DB) error {
+// Create creates a model run for the specified model
+func (r *ModelRun) Create(db *gorm.DB, m Model) error {
+	r.ModelID = m.ID
 	return db.Create(&r).Error
 }
 
-// GetAll gets all instances from DB
-func (r *ModelRun) GetAll(db *gorm.DB) (*[]ModelRun, error) {
+// GetAll gets all model runs for the specified model from DB
+func (r *ModelRun) GetAll(db *gorm.DB, m Model) (*[]ModelRun, error) {
 	runs := []ModelRun{}
 	err := db.Find(&runs).Error
 	if err != nil {
