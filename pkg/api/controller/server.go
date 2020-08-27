@@ -14,8 +14,8 @@ import (
 
 // Server is the struct for the server
 type Server struct {
-	db     *gorm.DB
-	router *chi.Mux
+	DB     *gorm.DB
+	Router *chi.Mux
 }
 
 // Init initialize the server with database and router
@@ -24,7 +24,7 @@ func (s *Server) Init(DbDriver, DbName string) {
 	var err error
 	switch DbDriver {
 	case "sqlite3":
-		s.db, err = gorm.Open(DbDriver, DbName)
+		s.DB, err = gorm.Open(DbDriver, DbName)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -32,30 +32,43 @@ func (s *Server) Init(DbDriver, DbName string) {
 		log.Fatal(fmt.Errorf("%s is not a supported database", DbDriver))
 	}
 	// TODO add foreign key & index when necessary
-	s.db.AutoMigrate(&model.Model{}, &model.ModelRun{})
-	s.router = chi.NewRouter()
+	s.DB.AutoMigrate(&model.Model{}, &model.ModelRun{})
+	s.Router = chi.NewRouter()
 	// A good base middleware stack
-	s.router.Use(middleware.RequestID)
-	s.router.Use(middleware.RealIP)
-	s.router.Use(middleware.Logger)
-	s.router.Use(middleware.Recoverer)
+	s.Router.Use(middleware.RequestID)
+	s.Router.Use(middleware.RealIP)
+	s.Router.Use(middleware.Logger)
+	s.Router.Use(middleware.Recoverer)
 	// set routes
 	s.SetRoutes()
 }
 
 // SetRoutes sets the routs for the server
 func (s *Server) SetRoutes() {
-	r := s.router
+	r := s.Router
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello Mltrack\n")
+	})
+
+	//project endpoints
+	r.Route("/projects", func(r chi.Router) {
+		r.Post("/", s.CreateProject)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", s.GetProjectByID)
+			r.Delete("/", s.DeleteProjectByID)
+		})
+		r.Get("/all", s.GetAllProjects)
 	})
 
 	// model endpoints
 	r.Route("/models", func(r chi.Router) {
 		r.Post("/", s.CreateModel)
-		r.Get("/", s.GetModel)
-		r.Delete("/", s.DeleteModel)
+		r.Route("/{id}", func(r chi.Router) {
+			r.Get("/", s.GetModelByID)
+			r.Delete("/", s.DeleteModelByID)
+		})
 		r.Get("/all", s.GetAllModels)
+		r.Get("/query", s.GetModelWithQuery)
 	})
 
 	// model run endpoints
@@ -74,5 +87,5 @@ func (s *Server) SetRoutes() {
 func (s *Server) Run(port uint) {
 	fmt.Printf("Listening to port %d\n", port)
 	addr := ":" + fmt.Sprint(port)
-	log.Fatal(http.ListenAndServe(addr, s.router))
+	log.Fatal(http.ListenAndServe(addr, s.Router))
 }

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -14,12 +13,12 @@ import (
 // CreateModelRun creates the entity in the database
 func (s *Server) CreateModelRun(w http.ResponseWriter, r *http.Request) {
 	m := model.ModelRun{}
-	err := apiutil.ReadReqBody(w, r, s.db, &m)
+	err := apiutil.ReadReqBody(w, r, s.DB, &m)
 	if err != nil {
 		apiutil.RespError(w, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = m.Create(s.db)
+	err = m.Create(s.DB)
 	if err != nil {
 		apiutil.RespError(w, http.StatusInternalServerError, err)
 		return
@@ -30,13 +29,12 @@ func (s *Server) CreateModelRun(w http.ResponseWriter, r *http.Request) {
 // GetAllModelRuns gets all the models from the database
 func (s *Server) GetAllModelRuns(w http.ResponseWriter, r *http.Request) {
 	m := model.ModelRun{}
-	models, err := m.GetAll(s.db)
+	runs, err := m.GetAll(s.DB)
 	if err != nil {
 		apiutil.RespError(w, http.StatusInternalServerError, err)
 		return
 	}
-	log.Println(models)
-	apiutil.RespSuccess(w, models)
+	apiutil.RespSuccess(w, runs)
 }
 
 // GetModelRunByID gets one model given an ID from the database
@@ -47,7 +45,7 @@ func (s *Server) GetModelRunByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m := model.ModelRun{}
-	modelGet, err := m.GetByID(s.db, id)
+	modelGet, err := m.GetByID(s.DB, id)
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
@@ -63,7 +61,7 @@ func (s *Server) DeleteModelRunByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	m := model.ModelRun{}
-	err = m.DeleteByID(s.db, id)
+	err = m.DeleteByID(s.DB, id)
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
