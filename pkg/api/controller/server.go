@@ -32,7 +32,7 @@ func (s *Server) Init(DbDriver, DbName string) {
 		log.Fatal(fmt.Errorf("%s is not a supported database", DbDriver))
 	}
 	// TODO add foreign key & index when necessary
-	s.DB.AutoMigrate(&model.Model{}, &model.ModelRun{})
+	s.DB.AutoMigrate(&model.Project{}, &model.Model{}, &model.ModelRun{})
 	s.Router = chi.NewRouter()
 	// A good base middleware stack
 	s.Router.Use(middleware.RequestID)

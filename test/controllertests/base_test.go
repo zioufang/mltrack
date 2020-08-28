@@ -1,7 +1,6 @@
 package controllertests
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,18 +14,19 @@ const testDBName string = "test.db"
 var server = controller.Server{}
 
 func TestMain(m *testing.M) {
-	s.Init("sqlite3", testDBName)
+	os.Exit(testMainWrapper(m))
+}
+
+func testMainWrapper(m *testing.M) int {
+	server.Init("sqlite3", testDBName)
+	defer os.Remove(testDBName)
 	testRun := m.Run()
-	err := os.Remove(testDBName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	os.Exit(testRun)
+	return testRun
 
 }
 
 func execRequest(req *http.Request) *httptest.ResponseRecorder {
 	rec := httptest.NewRecorder()
-	s.Router.ServeHTTP(rec, req)
+	server.Router.ServeHTTP(rec, req)
 	return rec
 }

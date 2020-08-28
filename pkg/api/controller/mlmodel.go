@@ -98,9 +98,7 @@ func (s *Server) DeleteModelByID(w http.ResponseWriter, r *http.Request) {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
 	}
-	w.Header().Set("Entity", fmt.Sprintf("%d", id))
-	w.WriteHeader(http.StatusNoContent)
-	apiutil.RespSuccess(w, "")
+	apiutil.RespSuccessWithMessage(w, fmt.Sprintf("id %d deleted", id), "")
 }
 
 // DeleteModel deletes a model from the database
