@@ -65,6 +65,32 @@ func (m *Project) GetByName(db *gorm.DB, name string) (*Project, error) {
 	return m, err
 }
 
+// UpdateByID updates one instance by ID with the value from (m *Project)
+func (m *Project) UpdateByID(db *gorm.DB, id uint64) (*Project, error) {
+	updateMap := make(map[string]interface{})
+	var err error
+	if m.Name != "" {
+		updateMap["name"] = m.Name
+	}
+	if m.Description != "" {
+		updateMap["description"] = m.Description
+	}
+	if len(updateMap) == 0 {
+		return &Project{}, errors.New("Updated name or description needs to be provided")
+
+	}
+	err = db.Model(&Project{}).Where("id = ?", id).Updates(updateMap).Error
+	if err != nil {
+		return &Project{}, err
+	}
+	// get the updated project
+	err = db.Model(&Project{}).Where("id = ?", id).Take(&m).Error
+	if err != nil {
+		return &Project{}, err
+	}
+	return m, err
+}
+
 // DeleteByID deletes the current instance from DB
 func (m *Project) DeleteByID(db *gorm.DB, id uint64) error {
 	return db.Model(&m).Where("id = ?", id).Take(&m).Delete(&m).Error

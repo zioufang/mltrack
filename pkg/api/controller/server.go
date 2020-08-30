@@ -53,8 +53,10 @@ func (s *Server) SetRoutes() {
 	//project endpoints
 	r.Route("/projects", func(r chi.Router) {
 		r.Post("/", s.CreateProject)
+		r.Get("/", s.GetProjectByParam)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", s.GetProjectByID)
+			r.Put("/", s.UpdateProjectByID)
 			r.Delete("/", s.DeleteProjectByID)
 		})
 		r.Get("/all", s.GetAllProjects)

@@ -70,3 +70,16 @@ func ReadReqBody(w http.ResponseWriter, r *http.Request, db *gorm.DB, e Entity) 
 	}
 	return nil
 }
+
+// ReadReqBodyWithoutValidate reads the request body into a specified Struct and validate it
+func ReadReqBodyWithoutValidate(w http.ResponseWriter, r *http.Request, db *gorm.DB, e Entity) error {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(body, &e)
+	if err != nil {
+		return err
+	}
+	return nil
+}

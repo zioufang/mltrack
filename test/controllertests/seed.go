@@ -2,12 +2,13 @@ package controllertests
 
 import "github.com/zioufang/mltrackapi/pkg/api/model"
 
-func clearProjectTable() {
-	server.DB.Exec("DELETE FROM projects;")
+func resetProjectTable() {
+	server.DB.DropTableIfExists(&model.Project{})
+	server.DB.AutoMigrate(&model.Project{})
 }
 
 func seedProjectTable() []model.Project {
-	clearProjectTable()
+	resetProjectTable()
 	projects := []model.Project{
 		{
 			Name:        "daoud",
@@ -18,6 +19,9 @@ func seedProjectTable() []model.Project {
 			Description: "this is project estobar",
 		},
 	}
-	server.DB.Create(&projects)
+	for i := range projects {
+		server.DB.Create(&projects[i])
+
+	}
 	return projects
 }
