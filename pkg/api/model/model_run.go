@@ -22,6 +22,18 @@ func (r *ModelRun) FormatAndValidate(db *gorm.DB) error {
 	return nil
 }
 
+// Format formats the input
+func (r *ModelRun) Format() {
+	if r.Name != "" {
+		r.Name = html.EscapeString(strings.TrimSpace(r.Name))
+	}
+}
+
+// Validate validates the input, use after Format
+func (r *ModelRun) Validate(db *gorm.DB) error {
+	return nil
+}
+
 // Create creates a model run for the specified model
 func (r *ModelRun) Create(db *gorm.DB) error {
 	return db.Create(&r).Error

@@ -16,9 +16,18 @@ type Project struct {
 	Description string `json:"description"`
 }
 
-// FormatAndValidate formats the input then validates it
-func (m *Project) FormatAndValidate(db *gorm.DB) error {
-	m.Name = html.EscapeString(strings.TrimSpace(m.Name))
+// Format formats the input
+func (m *Project) Format() {
+	if m.Name != "" {
+		m.Name = html.EscapeString(strings.TrimSpace(m.Name))
+	}
+	if m.Description != "" {
+		m.Description = strings.TrimSpace(m.Description)
+	}
+}
+
+// Validate validates the input, use after Format
+func (m *Project) Validate(db *gorm.DB) error {
 	if m.Name == "" {
 		return errors.New("Project Name cannot be empty")
 	}

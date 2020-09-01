@@ -11,7 +11,8 @@ import (
 
 // Entity is an abstract interface for a DB model used in API
 type Entity interface {
-	FormatAndValidate(*gorm.DB) error
+	Format()
+	Validate(*gorm.DB) error
 }
 
 // respBody is the struct for response body from http request
@@ -64,7 +65,8 @@ func ReadReqBody(w http.ResponseWriter, r *http.Request, db *gorm.DB, e Entity) 
 	if err != nil {
 		return err
 	}
-	err = e.FormatAndValidate(db)
+	e.Format()
+	err = e.Validate(db)
 	if err != nil {
 		return err
 	}
@@ -81,5 +83,6 @@ func ReadReqBodyWithoutValidate(w http.ResponseWriter, r *http.Request, db *gorm
 	if err != nil {
 		return err
 	}
+	e.Format()
 	return nil
 }

@@ -11,6 +11,7 @@ import (
 // Using the MLTRACK_URI env var, if not provided default to localhost:8000
 var URI = getURI()
 
+// TODO move these to api package and import from there, also for subroutes e.g. /projects/all
 // projectEndPoint is the root api endpoint for projects
 const projectEndPoint = "/projects"
 

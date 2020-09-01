@@ -33,6 +33,30 @@ func (m *Model) FormatAndValidate(db *gorm.DB) error {
 	return nil
 }
 
+// Format formats the input
+func (m *Model) Format() {
+	if m.Name != "" {
+		m.Name = html.EscapeString(strings.TrimSpace(m.Name))
+	}
+	if m.Description != "" {
+		m.Description = strings.TrimSpace(m.Description)
+	}
+}
+
+// Validate validates the input, use after Format
+func (m *Model) Validate(db *gorm.DB) error {
+	if m.Name == "" {
+		return errors.New("Model Name cannot be empty")
+	}
+	// TODO check if unique is enforced, if so then remove below, and *gorm.DB from func param
+	var count int
+	db.Where("name = ?", m.Name).Take(&Model{}).Count(&count)
+	if count != 0 {
+		return errors.New("Model Name already exists")
+	}
+	return nil
+}
+
 // Create creates the current instance in DB
 func (m *Model) Create(db *gorm.DB) error {
 	return db.Create(&m).Error
