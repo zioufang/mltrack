@@ -1,4 +1,4 @@
-package controllertests
+package endpointtests
 
 import (
 	"net/http"

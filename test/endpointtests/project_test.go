@@ -1,4 +1,4 @@
-package controllertests
+package endpointtests
 
 import (
 	"bytes"
@@ -57,7 +57,7 @@ func TestCreateProject(t *testing.T) {
 		},
 	}
 
-	resetProjectTable()
+	resetTables()
 
 	for _, c := range testCases {
 		req, _ := http.NewRequest("POST", "/projects", bytes.NewBufferString(c.input))
@@ -76,19 +76,6 @@ func TestCreateProject(t *testing.T) {
 		}
 	}
 
-}
-
-func TestGetAllProjects(t *testing.T) {
-	seedProjectTable()
-	req, _ := http.NewRequest("GET", "/projects/all", nil)
-	resp := execRequest(req)
-	var respMap projectMulti
-	json.Unmarshal([]byte(resp.Body.String()), &respMap)
-
-	fmt.Println("Testing: " + req.Method + " " + req.URL.String())
-	assert.Equal(t, resp.Code, http.StatusOK)
-	assert.Equal(t, respMap.Success, true)
-	assert.Equal(t, len(respMap.Data), 2)
 }
 
 func TestGetProjectByID(t *testing.T) {
@@ -277,4 +264,17 @@ func TestDeleteProjectByID(t *testing.T) {
 		assert.Equal(t, respMap.Success, c.expSuccess)
 		assert.Equal(t, resp.Code, c.statusCode)
 	}
+}
+
+func TestGetAllProjects(t *testing.T) {
+	seedProjectTable()
+	req, _ := http.NewRequest("GET", "/projects/all", nil)
+	resp := execRequest(req)
+	var respMap projectMulti
+	json.Unmarshal([]byte(resp.Body.String()), &respMap)
+
+	fmt.Println("Testing: " + req.Method + " " + req.URL.String())
+	assert.Equal(t, resp.Code, http.StatusOK)
+	assert.Equal(t, respMap.Success, true)
+	assert.Equal(t, len(respMap.Data), 2)
 }

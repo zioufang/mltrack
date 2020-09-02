@@ -65,12 +65,14 @@ func (s *Server) SetRoutes() {
 	// model endpoints
 	r.Route("/models", func(r chi.Router) {
 		r.Post("/", s.CreateModel)
+		r.Get("/", s.GetProjectByParam)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", s.GetModelByID)
+			r.Put("/", s.UpdateModelByID)
 			r.Delete("/", s.DeleteModelByID)
 		})
+		r.Get("/list", s.GetModelListByParam)
 		r.Get("/all", s.GetAllModels)
-		r.Get("/query", s.GetModelWithQuery)
 	})
 
 	// model run endpoints
@@ -82,6 +84,8 @@ func (s *Server) SetRoutes() {
 			r.Delete("/", s.DeleteModelRunByID)
 		})
 	})
+
+	// run attribute endpoints
 
 }
 

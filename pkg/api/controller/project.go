@@ -27,17 +27,6 @@ func (s *Server) CreateProject(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccess(w, m)
 }
 
-// GetAllProjects gets all the projects from the database
-func (s *Server) GetAllProjects(w http.ResponseWriter, r *http.Request) {
-	m := model.Project{}
-	projects, err := m.GetAll(s.DB)
-	if err != nil {
-		apiutil.RespError(w, http.StatusInternalServerError, err)
-		return
-	}
-	apiutil.RespSuccess(w, projects)
-}
-
 // GetProjectByID gets one project given an ID from the database
 func (s *Server) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
@@ -85,7 +74,7 @@ func (s *Server) GetProjectByParam(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// UpdateProjectByID updates the project name by ID
+// UpdateProjectByID updates the project instance by ID
 func (s *Server) UpdateProjectByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -122,4 +111,15 @@ func (s *Server) DeleteProjectByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	apiutil.RespSuccessWithMessage(w, fmt.Sprintf("id %d deleted", id), "")
+}
+
+// GetAllProjects gets all the projects from the database
+func (s *Server) GetAllProjects(w http.ResponseWriter, r *http.Request) {
+	m := model.Project{}
+	projects, err := m.GetAll(s.DB)
+	if err != nil {
+		apiutil.RespError(w, http.StatusInternalServerError, err)
+		return
+	}
+	apiutil.RespSuccess(w, projects)
 }
