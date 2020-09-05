@@ -178,6 +178,7 @@ func TestGetModelByParam(t *testing.T) {
 		var respMap modelSingle
 		json.Unmarshal([]byte(resp.Body.String()), &respMap)
 
+		fmt.Println("Resp Message: " + respMap.Message)
 		assert.Equal(t, resp.Code, c.statusCode)
 		assert.Equal(t, c.expSuccess, respMap.Success)
 		if c.statusCode == http.StatusOK {

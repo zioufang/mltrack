@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 
 func testMainWrapper(m *testing.M) int {
 	server.Init("sqlite3", testDBName)
-	defer os.Remove(testDBName)
+	// defer os.Remove(testDBName)
 	testRun := m.Run()
 	return testRun
 
