@@ -72,6 +72,10 @@ func (m *Model) GetAll(db *gorm.DB) (*[]Model, error) {
 func (m *Model) GetByProjectID(db *gorm.DB, projectID uint64) (*[]Model, error) {
 	models := []Model{}
 	err := db.Where("project_id = ?", projectID).Find(&models).Error
+	// if project_id is not found returns an error, as Find doesn't return err with o result unlike Take
+	if err == nil && len(models) == 0 {
+		err = errors.New("no record found with given project_id")
+	}
 	return &models, err
 
 }

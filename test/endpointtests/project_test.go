@@ -267,7 +267,7 @@ func TestDeleteProjectByID(t *testing.T) {
 }
 
 func TestGetAllProjects(t *testing.T) {
-	seedProjectTable()
+	projects := seedProjectTable()
 	req, _ := http.NewRequest("GET", "/projects/all", nil)
 	resp := execRequest(req)
 	var respMap projectMulti
@@ -276,5 +276,5 @@ func TestGetAllProjects(t *testing.T) {
 	fmt.Println("Testing: " + req.Method + " " + req.URL.String())
 	assert.Equal(t, resp.Code, http.StatusOK)
 	assert.Equal(t, respMap.Success, true)
-	assert.Equal(t, len(respMap.Data), 2)
+	assert.Equal(t, len(respMap.Data), len(projects))
 }

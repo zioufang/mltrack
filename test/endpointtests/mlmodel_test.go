@@ -130,6 +130,7 @@ func TestGetModelByID(t *testing.T) {
 		}
 	}
 }
+
 func TestGetModelByParam(t *testing.T) {
 	models := seedModelTable()
 	testCases := []struct {
@@ -185,4 +186,173 @@ func TestGetModelByParam(t *testing.T) {
 			assert.Equal(t, c.expID, respMap.Data.ID)
 		}
 	}
+}
+
+func TestUpdateModelByID(t *testing.T) {
+	models := seedModelTable()
+	testCases := []struct {
+		inID           string
+		updateJSON     string
+		expName        string
+		expStatus      string
+		expDescription string
+		expSuccess     bool
+		statusCode     int
+	}{
+		{
+			inID:           fmt.Sprint(models[0].ID),
+			updateJSON:     `{"name":"daoud_2"}`,
+			expName:        "daoud_2",
+			expStatus:      models[0].Status,
+			expDescription: models[0].Description,
+			expSuccess:     true,
+			statusCode:     http.StatusOK,
+		},
+		{
+			inID:       fmt.Sprint(models[0].ID),
+			updateJSON: `{"name":"berwick","project_id":123, "description":"this is model berwick"}`,
+			expSuccess: false,
+			statusCode: http.StatusInternalServerError,
+		},
+		{
+			inID:           fmt.Sprint(models[1].ID),
+			updateJSON:     `{"status":"newstatus", "description":"this is model estobar 2"}`,
+			expName:        models[1].Name,
+			expStatus:      "newstatus",
+			expDescription: "this is model estobar 2",
+			expSuccess:     true,
+			statusCode:     http.StatusOK,
+		},
+		{
+			inID:           fmt.Sprint(models[1].ID),
+			updateJSON:     `{"name":"berwick", "description":"this is model berwick"}`,
+			expName:        "berwick",
+			expStatus:      models[1].Status,
+			expDescription: "this is model berwick",
+			expSuccess:     true,
+			statusCode:     http.StatusOK,
+		},
+		{
+			inID:       "12345",
+			updateJSON: `{"name":"berwick", "description":"this is model berwick"}`,
+			expSuccess: false,
+			statusCode: http.StatusInternalServerError,
+		},
+		{
+			inID:       fmt.Sprint(models[1].ID),
+			updateJSON: `{}`,
+			expSuccess: false,
+			statusCode: http.StatusInternalServerError,
+		},
+	}
+
+	for _, c := range testCases {
+		req, _ := http.NewRequest("PUT", "/models/"+c.inID, bytes.NewBufferString(c.updateJSON))
+		resp := execRequest(req)
+		var respMap modelSingle
+		json.Unmarshal([]byte(resp.Body.String()), &respMap)
+
+		fmt.Println("Testing: " + req.Method + " " + req.URL.String())
+		fmt.Println(respMap.Message)
+		assert.Equal(t, resp.Code, c.statusCode)
+		assert.Equal(t, respMap.Success, c.expSuccess)
+		if c.statusCode == http.StatusOK {
+			assert.Equal(t, c.expName, respMap.Data.Name)
+			assert.Equal(t, c.expDescription, respMap.Data.Description)
+		}
+	}
+}
+
+func TestDeleteModelByID(t *testing.T) {
+	models := seedModelTable()
+	testCases := []struct {
+		inID       string
+		expSuccess bool
+		statusCode int
+	}{
+		{
+			inID:       fmt.Sprint(models[0].ID),
+			expSuccess: true,
+			statusCode: http.StatusOK,
+		},
+		{
+			inID:       "123456",
+			expSuccess: false,
+			statusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, c := range testCases {
+		req, _ := http.NewRequest("DELETE", "/models/"+c.inID, nil)
+		resp := execRequest(req)
+		var respMap modelSingle
+		json.Unmarshal([]byte(resp.Body.String()), &respMap)
+
+		fmt.Println("Testing: " + req.Method + " " + req.URL.String())
+		assert.Equal(t, respMap.Success, c.expSuccess)
+		assert.Equal(t, resp.Code, c.statusCode)
+	}
+}
+
+func TestGetAllModels(t *testing.T) {
+	models := seedModelTable()
+	req, _ := http.NewRequest("GET", "/models/all", nil)
+	resp := execRequest(req)
+	var respMap modelMulti
+	json.Unmarshal([]byte(resp.Body.String()), &respMap)
+
+	fmt.Println("Testing: " + req.Method + " " + req.URL.String())
+	assert.Equal(t, resp.Code, http.StatusOK)
+	assert.Equal(t, respMap.Success, true)
+	assert.Equal(t, len(respMap.Data), len(models))
+}
+
+func TestGetModelListByParam(t *testing.T) {
+	models := seedModelTable()
+	// TODO fix the hard coded expCount
+	testCases := []struct {
+		inProjectID string
+		expCount    int
+		expSuccess  bool
+		statusCode  int
+	}{
+		{
+			inProjectID: fmt.Sprint(models[0].ProjectID),
+			expCount:    2,
+			expSuccess:  true,
+			statusCode:  http.StatusOK,
+		},
+		{
+			inProjectID: fmt.Sprint(models[2].ProjectID),
+			expCount:    1,
+			expSuccess:  true,
+			statusCode:  http.StatusOK,
+		},
+		{
+			inProjectID: "123456",
+			expSuccess:  false,
+			statusCode:  http.StatusBadRequest,
+		},
+	}
+
+	for _, c := range testCases {
+		req, _ := http.NewRequest("GET", "/models/list", nil)
+		q := req.URL.Query()
+		if c.inProjectID != "" {
+			q.Add("project_id", c.inProjectID)
+		}
+		req.URL.RawQuery = q.Encode()
+		fmt.Println("Testing: " + req.Method + " " + req.URL.String())
+		resp := execRequest(req)
+		var respMap modelMulti
+		json.Unmarshal([]byte(resp.Body.String()), &respMap)
+
+		fmt.Println("Resp Message: " + respMap.Message)
+		assert.Equal(t, resp.Code, c.statusCode)
+		assert.Equal(t, c.expSuccess, respMap.Success)
+		if c.statusCode == http.StatusOK {
+			assert.Equal(t, c.expCount, len(respMap.Data))
+		}
+	}
+
 }
