@@ -1,6 +1,8 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"html"
 	"strings"
 
@@ -14,14 +16,6 @@ type ModelRun struct {
 	Name    string `json:"name"`
 }
 
-// FormatAndValidate formats the input then validates it
-func (r *ModelRun) FormatAndValidate(db *gorm.DB) error {
-	if r.Name != "" {
-		r.Name = html.EscapeString(strings.TrimSpace(r.Name))
-	}
-	return nil
-}
-
 // Format formats the input
 func (r *ModelRun) Format() {
 	if r.Name != "" {
@@ -31,6 +25,13 @@ func (r *ModelRun) Format() {
 
 // Validate validates the input, use after Format
 func (r *ModelRun) Validate(db *gorm.DB) error {
+	if r.ModelID == 0 {
+		return errors.New("Model ID cannot be empty")
+	}
+	res := db.Where("id = ?", r.ModelID).Take(&Model{})
+	if res.RowsAffected == 0 {
+		return fmt.Errorf("Model with id %d doesn't exist", r.ModelID)
+	}
 	return nil
 }
 
@@ -39,15 +40,15 @@ func (r *ModelRun) Create(db *gorm.DB) error {
 	return db.Create(&r).Error
 }
 
-// GetAll gets all model runs for the specified model from DB
-func (r *ModelRun) GetAll(db *gorm.DB) (*[]ModelRun, error) {
+// GetByModelID gets all model runs for the specified model from DB
+func (r *ModelRun) GetByModelID(db *gorm.DB, modelID uint64) (*[]ModelRun, error) {
 	runs := []ModelRun{}
-	err := db.Find(&runs).Error
-	if err != nil {
-		return &[]ModelRun{}, err
+	err := db.Where("model_id = ?", modelID).Find(&runs).Error
+	// if project_id is not found returns an error, as Find doesn't return err with o result unlike Take
+	if err == nil && len(runs) == 0 {
+		err = errors.New("no record found with given project_id")
 	}
 	return &runs, err
-
 }
 
 // GetByID gets one instance by ID from DB

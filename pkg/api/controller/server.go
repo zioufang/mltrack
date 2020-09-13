@@ -78,11 +78,11 @@ func (s *Server) SetRoutes() {
 	// model run endpoints
 	r.Route("/runs", func(r chi.Router) {
 		r.Post("/", s.CreateModelRun)
-		r.Get("/", s.GetAllModelRuns)
 		r.Route("/{id}", func(r chi.Router) {
 			r.Get("/", s.GetModelRunByID)
 			r.Delete("/", s.DeleteModelRunByID)
 		})
+		r.Get("/list", s.GetModelRunListByParam)
 	})
 
 	// run attribute endpoints

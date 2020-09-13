@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -24,17 +25,6 @@ func (s *Server) CreateModelRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	apiutil.RespSuccess(w, m)
-}
-
-// GetAllModelRuns gets all the models from the database
-func (s *Server) GetAllModelRuns(w http.ResponseWriter, r *http.Request) {
-	m := model.ModelRun{}
-	runs, err := m.GetAll(s.DB)
-	if err != nil {
-		apiutil.RespError(w, http.StatusInternalServerError, err)
-		return
-	}
-	apiutil.RespSuccess(w, runs)
 }
 
 // GetModelRunByID gets one model given an ID from the database
@@ -67,4 +57,27 @@ func (s *Server) DeleteModelRunByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	apiutil.RespSuccessWithMessage(w, fmt.Sprintf("id %d deleted", id), "")
+}
+
+// GetModelRunListByParam gets a list of models by the project_id
+func (s *Server) GetModelRunListByParam(w http.ResponseWriter, r *http.Request) {
+	var modelRunsGet *[]model.ModelRun
+	m := model.ModelRun{}
+
+	modelIDParam := r.URL.Query().Get("model_id")
+	if modelIDParam == "" {
+		apiutil.RespError(w, http.StatusUnprocessableEntity, errors.New("Need to provide the parameter 'model_id'"))
+		return
+	}
+	modelID, err := strconv.ParseUint(modelIDParam, 10, 64)
+	if err != nil {
+		apiutil.RespError(w, http.StatusBadRequest, err)
+		return
+	}
+	modelRunsGet, err = m.GetByModelID(s.DB, modelID)
+	if err != nil {
+		apiutil.RespError(w, http.StatusBadRequest, err)
+		return
+	}
+	apiutil.RespSuccess(w, modelRunsGet)
 }

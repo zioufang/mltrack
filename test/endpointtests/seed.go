@@ -5,7 +5,8 @@ import "github.com/zioufang/mltrackapi/pkg/api/model"
 func resetTables() {
 	server.DB.DropTableIfExists(&model.Project{})
 	server.DB.DropTableIfExists(&model.Model{})
-	server.DB.AutoMigrate(&model.Project{}, &model.Model{})
+	server.DB.DropTableIfExists(&model.ModelRun{})
+	server.DB.AutoMigrate(&model.Project{}, &model.Model{}, &model.ModelRun{})
 }
 
 func seedProjectTable() []model.Project {
@@ -54,4 +55,27 @@ func seedModelTable() []model.Model {
 		server.DB.Create(&models[i])
 	}
 	return models
+}
+
+func seedModelRunTable() []model.ModelRun {
+	models := seedModelTable()
+	runs := []model.ModelRun{
+		{
+
+			Name:    "perceval",
+			ModelID: models[0].ID,
+		},
+		{
+			Name:    "burroughs",
+			ModelID: models[0].ID,
+		},
+		{
+			Name:    "paramythis",
+			ModelID: models[1].ID,
+		},
+	}
+	for i := range models {
+		server.DB.Create(&runs[i])
+	}
+	return runs
 }
