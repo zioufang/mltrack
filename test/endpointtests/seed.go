@@ -6,7 +6,13 @@ func resetTables() {
 	server.DB.DropTableIfExists(&model.Project{})
 	server.DB.DropTableIfExists(&model.Model{})
 	server.DB.DropTableIfExists(&model.ModelRun{})
-	server.DB.AutoMigrate(&model.Project{}, &model.Model{}, &model.ModelRun{})
+	server.DB.DropTableIfExists(&model.RunNumAttr{})
+	server.DB.AutoMigrate(
+		&model.Project{},
+		&model.Model{},
+		&model.ModelRun{},
+		&model.RunNumAttr{},
+	)
 }
 
 func seedProjectTable() []model.Project {
@@ -74,8 +80,60 @@ func seedModelRunTable() []model.ModelRun {
 			ModelID: models[1].ID,
 		},
 	}
-	for i := range models {
+	for i := range runs {
 		server.DB.Create(&runs[i])
 	}
 	return runs
+}
+
+func seedRunNumAttrTable() []model.RunNumAttr {
+	modelRuns := seedModelRunTable()
+	attrs := []model.RunNumAttr{
+		{
+			ModelRunID: modelRuns[0].ID,
+			Name:       "metric_1",
+			Category:   "metric",
+			Value:      getFloatPointer(0.1),
+		},
+		{
+			ModelRunID: modelRuns[0].ID,
+			Name:       "metric_2",
+			Category:   "metric",
+			Value:      getFloatPointer(0.0),
+		},
+		{
+			ModelRunID: modelRuns[0].ID,
+			Name:       "param_2",
+			Category:   "param",
+			Value:      getFloatPointer(0.0),
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Name:       "metric_1",
+			Category:   "metric",
+			Value:      getFloatPointer(0.1),
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Name:       "param_1",
+			Category:   "param",
+			Value:      getFloatPointer(1.0),
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Name:       "param_2",
+			Category:   "param",
+			Value:      getFloatPointer(0.0001),
+		},
+	}
+
+	for i := range attrs {
+		server.DB.Create(&attrs[i])
+	}
+
+	return attrs
+}
+
+func getFloatPointer(val float32) *float32 {
+	return &val
 }

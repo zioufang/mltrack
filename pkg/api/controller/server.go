@@ -32,7 +32,12 @@ func (s *Server) Init(DbDriver, DbName string) {
 		log.Fatal(fmt.Errorf("%s is not a supported database", DbDriver))
 	}
 	// TODO add foreign key & index when necessary
-	s.DB.AutoMigrate(&model.Project{}, &model.Model{}, &model.ModelRun{})
+	s.DB.AutoMigrate(
+		&model.Project{},
+		&model.Model{},
+		&model.ModelRun{},
+		&model.RunNumAttr{},
+	)
 	s.Router = chi.NewRouter()
 	// A good base middleware stack
 	s.Router.Use(middleware.RequestID)
@@ -86,6 +91,10 @@ func (s *Server) SetRoutes() {
 	})
 
 	// run attribute endpoints
+	r.Route("/num_attrs", func(r chi.Router) {
+		r.Post("/", s.CreateRunNumAttr)
+		r.Get("/list", s.GetRunNumAttrListByParam)
+	})
 
 }
 
