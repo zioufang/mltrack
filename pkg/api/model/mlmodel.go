@@ -6,7 +6,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // Model is the struct to hold a machine learning model

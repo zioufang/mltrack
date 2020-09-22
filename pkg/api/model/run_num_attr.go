@@ -6,7 +6,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // RunNumAttr is Numeric Attribute for Model Runs, e.g. metrics & hyper parameters

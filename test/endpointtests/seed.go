@@ -3,10 +3,10 @@ package endpointtests
 import "github.com/zioufang/mltrackapi/pkg/api/model"
 
 func resetTables() {
-	server.DB.DropTableIfExists(&model.Project{})
-	server.DB.DropTableIfExists(&model.Model{})
-	server.DB.DropTableIfExists(&model.ModelRun{})
-	server.DB.DropTableIfExists(&model.RunNumAttr{})
+	server.DB.Migrator().DropTable(&model.Project{})
+	server.DB.Migrator().DropTable(&model.Model{})
+	server.DB.Migrator().DropTable(&model.ModelRun{})
+	server.DB.Migrator().DropTable(&model.RunNumAttr{})
 	server.DB.AutoMigrate(
 		&model.Project{},
 		&model.Model{},

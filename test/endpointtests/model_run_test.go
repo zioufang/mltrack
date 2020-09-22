@@ -12,14 +12,14 @@ import (
 	"gopkg.in/go-playground/assert.v1"
 )
 
-// response body with single model
+// response body with single model run
 type modelRunSingle struct {
 	Success bool           `json:"success"`
 	Message string         `json:"message"`
 	Data    model.ModelRun `json:"data"`
 }
 
-// response body with multiple models
+// response body with multiple model runs
 type modelRunMulti struct {
 	Success bool             `json:"success"`
 	Message string           `json:"message"`
@@ -83,6 +83,7 @@ func TestCreateModelRun(t *testing.T) {
 		// compare response with expected
 		fmt.Println("Testing: " + req.Method + " " + req.URL.String())
 		assert.Equal(t, resp.Code, c.statusCode)
+		assert.Equal(t, c.expSuccess, respMap.Success)
 		if c.statusCode == http.StatusOK {
 			assert.Equal(t, c.expName, respMap.Data.Name)
 			assert.Equal(t, c.expModelID, respMap.Data.ModelID)
@@ -200,7 +201,9 @@ func TestGetModelRunListByParam(t *testing.T) {
 		var respMap modelRunMulti
 		json.Unmarshal([]byte(resp.Body.String()), &respMap)
 
-		fmt.Println("Resp Message: " + respMap.Message)
+		if respMap.Message != "" {
+			fmt.Println("Msg: " + respMap.Message)
+		}
 		assert.Equal(t, resp.Code, c.statusCode)
 		assert.Equal(t, c.expSuccess, respMap.Success)
 		if c.statusCode == http.StatusOK {

@@ -5,7 +5,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // Project is the struct to hold a project
@@ -32,9 +32,8 @@ func (m *Project) Validate(db *gorm.DB) error {
 		return errors.New("Project Name cannot be empty")
 	}
 	// TODO check if unique is enforced, if so then remove below, and *gorm.DB from func param
-	var count int
-	db.Where("name = ?", m.Name).Take(&Project{}).Count(&count)
-	if count != 0 {
+	res := db.Where("name = ?", m.Name).Take(&Project{})
+	if res.RowsAffected != 0 {
 		return errors.New("Project Name already exists")
 	}
 	return nil

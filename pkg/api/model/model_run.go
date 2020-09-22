@@ -6,7 +6,7 @@ import (
 	"html"
 	"strings"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // ModelRun is the struct to hold the training run done to the ml model

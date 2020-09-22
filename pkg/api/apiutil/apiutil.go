@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 // Entity is an abstract interface for a DB model used in API

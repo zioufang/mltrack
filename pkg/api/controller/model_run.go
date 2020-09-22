@@ -43,7 +43,7 @@ func (s *Server) GetModelRunByID(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccess(w, modelGet)
 }
 
-// DeleteModelRunByID deletes one model given an ID from the database
+// DeleteModelRunByID deletes one model run given an ID from the database
 func (s *Server) DeleteModelRunByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -59,7 +59,7 @@ func (s *Server) DeleteModelRunByID(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccessWithMessage(w, fmt.Sprintf("id %d deleted", id), "")
 }
 
-// GetModelRunListByParam gets a list of models by the project_id
+// GetModelRunListByParam gets a list of model runs by the model_id
 func (s *Server) GetModelRunListByParam(w http.ResponseWriter, r *http.Request) {
 	var modelRunsGet *[]model.ModelRun
 	m := model.ModelRun{}

@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/zioufang/mltrackapi/pkg/api/model"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // Server is the struct for the server
@@ -24,7 +24,7 @@ func (s *Server) Init(DbDriver, DbName string) {
 	var err error
 	switch DbDriver {
 	case "sqlite3":
-		s.DB, err = gorm.Open(DbDriver, DbName)
+		s.DB, err = gorm.Open(sqlite.Open(DbName), &gorm.Config{})
 		if err != nil {
 			log.Fatal(err)
 		}
