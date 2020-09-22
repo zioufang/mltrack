@@ -99,34 +99,41 @@ func TestGetRunNumAttrListByParam(t *testing.T) {
 	attrs := seedRunNumAttrTable()
 
 	testCases := []struct {
-		inModelRunID string
-		inName       string
-		inCategory   string
-		expCount     int
-		expSuccess   bool
-		statusCode   int
+		inModelRunIDs []string
+		inNames       []string
+		inCategories  []string
+		expCount      int
+		expSuccess    bool
+		statusCode    int
 	}{
 		{
-			inModelRunID: fmt.Sprint(attrs[0].ModelRunID),
-			inName:       "metric_1",
-			inCategory:   "metric",
-			expCount:     1,
-			expSuccess:   true,
-			statusCode:   http.StatusOK,
+			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID)},
+			inNames:       []string{"metric_1"},
+			inCategories:  []string{"metric"},
+			expCount:      1,
+			expSuccess:    true,
+			statusCode:    http.StatusOK,
 		},
 	}
 
 	for _, c := range testCases {
 		req, _ := http.NewRequest("GET", "/num_attrs/list", nil)
 		q := req.URL.Query()
-		if c.inModelRunID != "" {
-			q.Add("model_run_id", c.inModelRunID)
+		if len(c.inModelRunIDs) > 0 {
+			for i := range c.inModelRunIDs {
+				q.Add("model_run_id", c.inModelRunIDs[i])
+
+			}
 		}
-		if c.inName != "" {
-			q.Add("name", c.inName)
+		if len(c.inNames) > 0 {
+			for i := range c.inNames {
+				q.Add("name", c.inNames[i])
+			}
 		}
-		if c.inCategory != "" {
-			q.Add("category", c.inCategory)
+		if len(c.inCategories) > 0 {
+			for i := range c.inCategories {
+				q.Add("category", c.inCategories[i])
+			}
 		}
 		req.URL.RawQuery = q.Encode()
 		fmt.Println("Testing: " + req.Method + " " + req.URL.String())

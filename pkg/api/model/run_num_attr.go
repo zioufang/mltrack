@@ -47,20 +47,20 @@ func (r *RunNumAttr) Create(db *gorm.DB) error {
 
 // Get gets all RunNumAttrs based on input for the specified model run from DB
 // modelRunID is required, the rest is optional
-func (r *RunNumAttr) Get(db *gorm.DB, modelRunID uint64, name string, category string) (*[]RunNumAttr, error) {
+func (r *RunNumAttr) Get(db *gorm.DB, modelRunIDs []uint64, names []string, categories []string) (*[]RunNumAttr, error) {
 	// build the query
 	sqlArgs := make(map[string]interface{})
-	sqlArgs["model_run_id"] = modelRunID
-	var sqlQuery string = "SELECT * FROM run_num_attrs WHERE model_run_id = @model_run_id"
+	sqlArgs["model_run_ids"] = modelRunIDs
+	var sqlQuery string = "SELECT * FROM run_num_attrs WHERE model_run_id IN @model_run_ids"
 
-	if name != "" {
-		sqlArgs["name"] = name
-		sqlQuery = sqlQuery + " AND name = @name"
+	if len(names) > 0 {
+		sqlArgs["names"] = names
+		sqlQuery = sqlQuery + " AND name IN @names"
 	}
 
-	if category != "" {
-		sqlArgs["category"] = category
-		sqlQuery = sqlQuery + " AND category = @category"
+	if len(categories) > 0 {
+		sqlArgs["categories"] = categories
+		sqlQuery = sqlQuery + " AND category IN @categories"
 	}
 
 	// run the query

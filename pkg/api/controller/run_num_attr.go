@@ -25,25 +25,32 @@ func (s *Server) CreateRunNumAttr(w http.ResponseWriter, r *http.Request) {
 	apiutil.RespSuccess(w, m)
 }
 
-// GetRunNumAttrListByParam gets a list of RunNumAttrs
+// GetRunNumAttrListByParam taks Param in list to get a list of RunNumAttrs
 func (s *Server) GetRunNumAttrListByParam(w http.ResponseWriter, r *http.Request) {
 	var RunNumAttrsGet *[]model.RunNumAttr
+	var err error
 	m := model.RunNumAttr{}
 
-	modelRunIDParam := r.URL.Query().Get("model_run_id")
-	if modelRunIDParam == "" {
+	// url param in list
+	// https://golang.org/pkg/net/url/#Values
+	// e.g. friend=Jess&friend=Sarah&friend=Zoe
+	modelRunIDsParam := r.URL.Query()["model_run_id"]
+	if len(modelRunIDsParam) == 0 {
 		apiutil.RespError(w, http.StatusUnprocessableEntity, errors.New("Need to provide the parameter 'model_run_id'"))
 		return
 	}
-	modelRunID, err := strconv.ParseUint(modelRunIDParam, 10, 64)
-	if err != nil {
-		apiutil.RespError(w, http.StatusBadRequest, err)
-		return
+	modelRunIDs := make([]uint64, len(modelRunIDsParam))
+	for i := range modelRunIDsParam {
+		modelRunIDs[i], err = strconv.ParseUint(modelRunIDsParam[i], 10, 64)
+		if err != nil {
+			apiutil.RespError(w, http.StatusBadRequest, err)
+			return
+		}
 	}
 
-	name := r.URL.Query().Get("name")
-	category := r.URL.Query().Get("category")
-	RunNumAttrsGet, err = m.Get(s.DB, modelRunID, name, category)
+	names := r.URL.Query()["name"]
+	categories := r.URL.Query()["category"]
+	RunNumAttrsGet, err = m.Get(s.DB, modelRunIDs, names, categories)
 	if err != nil {
 		apiutil.RespError(w, http.StatusBadRequest, err)
 		return
