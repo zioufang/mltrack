@@ -37,6 +37,7 @@ func (s *Server) Init(DbDriver, DbName string) {
 		&model.Model{},
 		&model.ModelRun{},
 		&model.RunNumAttr{},
+		&model.RunTag{},
 	)
 	s.Router = chi.NewRouter()
 	// A good base middleware stack
@@ -94,6 +95,12 @@ func (s *Server) SetRoutes() {
 	r.Route("/num_attrs", func(r chi.Router) {
 		r.Post("/", s.CreateRunNumAttr)
 		r.Get("/list", s.GetRunNumAttrListByParam)
+	})
+
+	// run tag enpoints
+	r.Route("/tags", func(r chi.Router) {
+		r.Post("/", s.CreateRunTag)
+		r.Get("/list", s.GetRunTagListByParam)
 	})
 
 }

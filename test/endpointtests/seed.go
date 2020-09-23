@@ -7,11 +7,13 @@ func resetTables() {
 	server.DB.Migrator().DropTable(&model.Model{})
 	server.DB.Migrator().DropTable(&model.ModelRun{})
 	server.DB.Migrator().DropTable(&model.RunNumAttr{})
+	server.DB.Migrator().DropTable(&model.RunTag{})
 	server.DB.AutoMigrate(
 		&model.Project{},
 		&model.Model{},
 		&model.ModelRun{},
 		&model.RunNumAttr{},
+		&model.RunTag{},
 	)
 }
 
@@ -132,6 +134,43 @@ func seedRunNumAttrTable() []model.RunNumAttr {
 	}
 
 	return attrs
+}
+
+func seedRunTagTable() []model.RunTag {
+	modelRuns := seedModelRunTable()
+	tags := []model.RunTag{
+		{
+			ModelRunID: modelRuns[0].ID,
+			Key:        "git_hash",
+			Value:      "dc823jfc",
+		},
+		{
+			ModelRunID: modelRuns[0].ID,
+			Key:        "input_data",
+			Value:      "s3://input-bucket/data",
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Key:        "git_hash",
+			Value:      "i49fm34y",
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Key:        "model_path",
+			Value:      "s3://model-bucket/here",
+		},
+		{
+			ModelRunID: modelRuns[1].ID,
+			Key:        "modeler",
+			Value:      "awesome guy",
+		},
+	}
+
+	for i := range tags {
+		server.DB.Create(&tags[i])
+	}
+
+	return tags
 }
 
 func getFloatPointer(val float32) *float32 {

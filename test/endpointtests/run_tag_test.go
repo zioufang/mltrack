@@ -12,64 +12,62 @@ import (
 )
 
 // response body with single attrs
-type runNumAttrSingle struct {
-	Success bool             `json:"success"`
-	Message string           `json:"message"`
-	Data    model.RunNumAttr `json:"data"`
+type runTagSingle struct {
+	Success bool         `json:"success"`
+	Message string       `json:"message"`
+	Data    model.RunTag `json:"data"`
 }
 
 // response body with multiple attrs
-type runNumAttrMulti struct {
-	Success bool               `json:"success"`
-	Message string             `json:"message"`
-	Data    []model.RunNumAttr `json:"data"`
+type runTagMulti struct {
+	Success bool           `json:"success"`
+	Message string         `json:"message"`
+	Data    []model.RunTag `json:"data"`
 }
 
-func TestCreateRunNumAttr(t *testing.T) {
+func TestCreateRunTag(t *testing.T) {
 	runs := seedModelRunTable()
 	testCases := []struct {
 		input         string
-		expName       string
+		expKey        string
 		expModelRunID uint64
-		expCategory   string
-		expValue      float32
+		expValue      string
 		expSuccess    bool
 		statusCode    int
 		errMsg        string
 	}{
 		{
-			input:         fmt.Sprintf(`{"name":"shoes_1065   ", "model_run_id":%d, "category":"metric", "value":0.1}`, runs[0].ID),
-			expName:       "shoes_1065",
+			input:         fmt.Sprintf(`{"key":"shoes_1065   ", "model_run_id":%d, "value":"lace"}`, runs[0].ID),
+			expKey:        "shoes_1065",
 			expModelRunID: runs[0].ID,
-			expCategory:   "metric",
-			expValue:      0.1,
+			expValue:      "lace",
 			expSuccess:    true,
 			statusCode:    http.StatusOK,
 			errMsg:        "",
 		},
 		{
-			input:      fmt.Sprintf(`{"name":"shoes_1065   ", "model_run_id":%d, "category":"metric", "value":1}`, runs[0].ID),
+			input:      fmt.Sprintf(`{"key":"shoes_1065   ", "model_run_id":%d, "value":"lace"}`, runs[0].ID),
 			expSuccess: false,
 			statusCode: http.StatusUnprocessableEntity,
-			errMsg:     "Name shoes_1065 already exists for this model run",
+			errMsg:     "Key shoes_1065 already exists for this model run",
 		},
 		{
-			input:      fmt.Sprintf(`{"name":"", "model_run_id":%d, "category":"metric", "value":1}`, runs[0].ID),
+			input:      fmt.Sprintf(`{"key":"", "model_run_id":%d, "value":"lace"}`, runs[0].ID),
 			expSuccess: false,
 			statusCode: http.StatusUnprocessableEntity,
-			errMsg:     "Name cannot be empty",
+			errMsg:     "Key cannot be empty",
 		},
 		{
-			input:      fmt.Sprintf(`{"name":"something", "model_run_id":12345, "category":"metric", "value":1}`),
+			input:      fmt.Sprintf(`{"key":"something", "model_run_id":12345,  "value":"lace"}`),
 			expSuccess: false,
 			statusCode: http.StatusUnprocessableEntity,
 			errMsg:     "Model Run with id 12345 doesn't exist",
 		},
 	}
 	for _, c := range testCases {
-		req, _ := http.NewRequest("POST", "/num_attrs", bytes.NewBufferString(c.input))
+		req, _ := http.NewRequest("POST", "/tags", bytes.NewBufferString(c.input))
 		resp := execRequest(req)
-		var respMap runNumAttrSingle
+		var respMap runTagSingle
 		json.Unmarshal([]byte(resp.Body.String()), &respMap)
 
 		// compare response with expected
@@ -80,9 +78,8 @@ func TestCreateRunNumAttr(t *testing.T) {
 		assert.Equal(t, resp.Code, c.statusCode)
 		assert.Equal(t, c.expSuccess, respMap.Success)
 		if c.statusCode == http.StatusOK {
-			assert.Equal(t, c.expName, respMap.Data.Name)
+			assert.Equal(t, c.expKey, respMap.Data.Key)
 			assert.Equal(t, c.expModelRunID, respMap.Data.ModelRunID)
-			assert.Equal(t, c.expCategory, respMap.Data.Category)
 			assert.Equal(t, c.expValue, respMap.Data.Value)
 		} else {
 			assert.Equal(t, c.errMsg, respMap.Message)
@@ -91,35 +88,33 @@ func TestCreateRunNumAttr(t *testing.T) {
 	}
 }
 
-func TestGetRunNumAttrListByParam(t *testing.T) {
-	attrs := seedRunNumAttrTable()
+func TestGetRunTagListByParam(t *testing.T) {
+	tags := seedRunTagTable()
 
 	testCases := []struct {
 		inModelRunIDs []string
-		inNames       []string
-		inCategories  []string
+		inKeys        []string
 		expCount      int
 		expSuccess    bool
 		statusCode    int
 	}{
 		{
-			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID)},
-			inNames:       []string{"metric_1"},
-			inCategories:  []string{"metric"},
+			inModelRunIDs: []string{fmt.Sprint(tags[0].ModelRunID)},
+			inKeys:        []string{"git_hash"},
 			expCount:      1,
 			expSuccess:    true,
 			statusCode:    http.StatusOK,
 		},
 		{
-			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID)},
-			expCount:      3,
+			inModelRunIDs: []string{fmt.Sprint(tags[0].ModelRunID)},
+			expCount:      2,
 			expSuccess:    true,
 			statusCode:    http.StatusOK,
 		},
 		// TODO better way of getting two different model_run_id
 		{
-			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID), fmt.Sprint(attrs[4].ModelRunID)},
-			inNames:       []string{"metric_1"},
+			inModelRunIDs: []string{fmt.Sprint(tags[0].ModelRunID), fmt.Sprint(tags[4].ModelRunID)},
+			inKeys:        []string{"git_hash"},
 			expCount:      2,
 			expSuccess:    true,
 			statusCode:    http.StatusOK,
@@ -127,7 +122,7 @@ func TestGetRunNumAttrListByParam(t *testing.T) {
 	}
 
 	for _, c := range testCases {
-		req, _ := http.NewRequest("GET", "/num_attrs/list", nil)
+		req, _ := http.NewRequest("GET", "/tags/list", nil)
 		q := req.URL.Query()
 		if len(c.inModelRunIDs) > 0 {
 			for i := range c.inModelRunIDs {
@@ -135,20 +130,15 @@ func TestGetRunNumAttrListByParam(t *testing.T) {
 
 			}
 		}
-		if len(c.inNames) > 0 {
-			for i := range c.inNames {
-				q.Add("name", c.inNames[i])
-			}
-		}
-		if len(c.inCategories) > 0 {
-			for i := range c.inCategories {
-				q.Add("category", c.inCategories[i])
+		if len(c.inKeys) > 0 {
+			for i := range c.inKeys {
+				q.Add("key", c.inKeys[i])
 			}
 		}
 		req.URL.RawQuery = q.Encode()
 		fmt.Println("Testing: " + req.Method + " " + req.URL.String())
 		resp := execRequest(req)
-		var respMap runNumAttrMulti
+		var respMap runTagMulti
 		json.Unmarshal([]byte(resp.Body.String()), &respMap)
 
 		if respMap.Message != "" {
