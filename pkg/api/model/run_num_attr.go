@@ -37,6 +37,10 @@ func (r *RunNumAttr) Validate(db *gorm.DB) error {
 	if res.RowsAffected == 0 {
 		return fmt.Errorf("Model Run with id %d doesn't exist", r.ModelRunID)
 	}
+	res = db.Where("id = ? and key = ?", r.ModelRunID, r.Name).Take(&RunNumAttr{})
+	if res.RowsAffected > 0 {
+		return fmt.Errorf("Name %s already exists for this model run", r.Name)
+	}
 	return nil
 }
 
