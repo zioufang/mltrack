@@ -114,6 +114,20 @@ func TestGetRunNumAttrListByParam(t *testing.T) {
 			expSuccess:    true,
 			statusCode:    http.StatusOK,
 		},
+		{
+			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID)},
+			expCount:      3,
+			expSuccess:    true,
+			statusCode:    http.StatusOK,
+		},
+		// TODO better way of getting two different model_run_id
+		{
+			inModelRunIDs: []string{fmt.Sprint(attrs[0].ModelRunID), fmt.Sprint(attrs[4].ModelRunID)},
+			inNames:       []string{"metric_1"},
+			expCount:      2,
+			expSuccess:    true,
+			statusCode:    http.StatusOK,
+		},
 	}
 
 	for _, c := range testCases {
